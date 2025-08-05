@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoodScoop - Smart Ice Cream Experience</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .mood-quiz {
+            display: none;
+        }
+
+        .mood-quiz.active {
+            display: block;
+        }
+
+        .question {
+            margin-bottom: 30px;
+            display: none;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .question.active {
+            display: block;
+        }
+
+        .question h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .option {
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            background: #f9f9f9;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: translateY(-2px);
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .result {
+            display: none;
+            text-align: center;
+            animation: bounceIn 1s ease-out;
+        }
+
+        .result.active {
+            display: block;
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+        }
+
+        .mood-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .product-recommendation {
+            background: #f9f9f9;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .product-image {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: white;
+        }
+
+        .stress { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+        .normal { background: linear-gradient(135deg, #f39c12, #e67e22); }
+        .happy { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+        .energy { background: linear-gradient(135deg, #34495e, #2c3e50); }
+
+        .nutrition-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .nutrition-item {
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .intro-screen {
+            text-align: center;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+        .feature {
+            text-align: center;
+            padding: 30px;
+            background: #f9f9f9;
+            border-radius: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .feature:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature i {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes bounceIn {
+            0% { opacity: 0; transform: scale(0.3); }
+            50% { opacity: 1; transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2rem; }
+            .main-content { padding: 20px; }
+            .options { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🧠 MoodScoop 🍦</h1>
+            <p>Smart Ice Cream Experience - Es Krim yang Ngerti Mood Kamu!</p>
+        </header>
+
+        <main class="main-content">
+            <!-- Intro Screen -->
+            <div id="intro" class="intro-screen">
+                <h2>Selamat Datang di MoodScoop!</h2>
+                <p>Es krim inovatif yang menggabungkan teknologi mood assessment dengan nutrisi optimal</p>
+                
+                <div class="features">
+                    <div class="feature">
+                        <i class="fas fa-brain"></i>
+                        <h3>Mood Assessment</h3>
+                        <p>Quiz pintar untuk menentukan rasa yang cocok dengan mood kamu</p>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-heart"></i>
+                        <h3>Enhanced Nutrition</h3>
+                        <p>Protein 2x lipat, kalsium tinggi, MCT oil untuk kesehatan optimal</p>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-star"></i>
+                        <h3>Premium Quality</h3>
+                        <p>Bahan natural berkualitas dengan harga terjangkau Rp 15.000</p>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" onclick="startQuiz()" style="font-size: 1.2rem; padding: 15px 40px;">
+                    <i class="fas fa-play"></i> Mulai Mood Check
+                </button>
+            </div>
+
+            <!-- Mood Quiz -->
+            <div id="quiz" class="mood-quiz">
+                <div class="progress-bar">
+                    <div class="progress" id="progressBar"></div>
+                </div>
+
+                <!-- Question 1 -->
+                <div class="question active" data-question="1">
+                    <h3>1. Bagaimana perasaan kamu hari ini?</h3>
+                    <div class="options">
+                        <div class="option" data-value="stress" onclick="selectOption(this)">
+                            😰 Stres / Capek banget
+                        </div>
+                        <div class="option" data-value="normal" onclick="selectOption(this)">
+                            😊 Biasa aja / Santai
+                        </div>
+                        <div class="option" data-value="happy" onclick="selectOption(this)">
+                            😄 Happy / Excited
+                        </div>
+                        <div class="option" data-value="energy" onclick="selectOption(this)">
+                            😴 Lemes / Butuh boost
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Question 2 -->
+                <div class="question" data-question="2">
+                    <h3>2. Aktivitas apa yang baru kamu lakukan?</h3>
+                    <div class="options">
+                        <div class="option" data-value="stress" onclick="selectOption(this)">
+                            💼 Kerja berat / Meeting
+                        </div>
+                        <div class="option" data-value="normal" onclick="selectOption(this)">
+                            📺 Santai / Nonton film
+                        </div>
+                        <div class="option" data-value="happy" onclick="selectOption(this)">
+                            🎉 Hangout / Celebration
+                        </div>
+                        <div class="option" data-value="energy" onclick="selectOption(this)">
+                            😴 Bangun tidur / Lembur
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Question 3 -->
+                <div class="question" data-question="3">
+                    <h3>3. Apa yang paling kamu butuhkan sekarang?</h3>
+                    <div class="options">
+                        <div class="option" data-value="stress" onclick="selectOption(this)">
+                            🧘 Ketenangan & relaksasi
+                        </div>
+                        <div class="option" data-value="normal" onclick="selectOption(this)">
+                            🤗 Comfort & kehangatan
+                        </div>
+                        <div class="option" data-value="happy" onclick="selectOption(this)">
+                            ✨ Fun & refreshing
+                        </div>
+                        <div class="option" data-value="energy" onclick="selectOption(this)">
+                            ⚡ Energy & semangat
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Question 4 -->
+                <div class="question" data-question="4">
+                    <h3>4. Warna mana yang paling menarik untuk kamu?</h3>
+                    <div class="options">
+                        <div class="option" data-value="stress" onclick="selectOption(this)">
+                            🟣 Ungu / Lavender
+                        </div>
+                        <div class="option" data-value="normal" onclick="selectOption(this)">
+                            🟤 Coklat / Krem
+                        </div>
+                        <div class="option" data-value="happy" onclick="selectOption(this)">
+                            🟢 Hijau / Orange
+                        </div>
+                        <div class="option" data-value="energy" onclick="selectOption(this)">
+                            ⚫ Hitam / Coklat tua
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Question 5 -->
+                <div class="question" data-question="5">
+                    <h3>5. Genre musik apa yang cocok dengan mood kamu?</h3>
+                    <div class="options">
+                        <div class="option" data-value="stress" onclick="selectOption(this)">
+                            🎵 Slow / Acoustic
+                        </div>
+                        <div class="option" data-value="normal" onclick="selectOption(this)">
+                            🎶 Easy listening / Jazz
+                        </div>
+                        <div class="option" data-value="happy" onclick="selectOption(this)">
+                            🎤 Pop / Upbeat
+                        </div>
+                        <div class="option" data-value="energy" onclick="selectOption(this)">
+                            🎸 Rock / Electronic
+                        </div>
+                    </div>
+                </div>
+
+                <div class="navigation">
+                    <button class="btn btn-secondary" id="prevBtn" onclick="previousQuestion()" style="display: none;">
+                        <i class="fas fa-arrow-left"></i> Sebelumnya
+                    </button>
+                    <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" style="display: none;">
+                        Selanjutnya <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Result Screen -->
+            <div id="result" class="result">
+                <div class="result-card">
+                    <div class="mood-icon" id="moodIcon"></div>
+                    <h2 id="moodTitle"></h2>
+                    <p id="moodDescription"></p>
+                </div>
+
+                <div class="product-recommendation">
+                    <h3>Rekomendasi Perfect untuk Kamu:</h3>
+                    <div class="product-image" id="productImage"></div>
+                    <h2 id="productName"></h2>
+                    <p id="productDescription"></p>
+                    <p><strong>Harga: Rp 15.000</strong></p>
+
+                    <div class="nutrition-info">
+                        <div class="nutrition-item">
+                            <strong>6.8g</strong><br>Protein
+                        </div>
+                        <div class="nutrition-item">
+                            <strong>180mg</strong><br>Kalsium
+                        </div>
+                        <div class="nutrition-item">
+                            <strong>4g</strong><br>MCT Oil
+                        </div>
+                        <div class="nutrition-item">
+                            <strong>195</strong><br>Kalori
+                        </div>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="btn btn-primary" onclick="shareResult()" style="margin-right: 10px;">
+                        <i class="fas fa-share"></i> Share Hasil
+                    </button>
+                    <button class="btn btn-secondary" onclick="restartQuiz()">
+                        <i class="fas fa-redo"></i> Quiz Lagi
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let currentQuestion = 1;
+        let answers = {};
+        const totalQuestions = 5;
+
+        const moodData = {
+            stress: {
+                title: "Mood Kamu: STRESSED 😰",
+                description: "Kamu butuh relaksasi dan ketenangan untuk menenangkan pikiran",
+                icon: "🧘",
+                product: {
+                    name: "Lavender Chamomile",
+                    description: "Ekstrak lavender untuk menenangkan + chamomile untuk mengurangi anxiety. Perfect untuk after-work relaxation!",
+                    image: "🟣",
+                    class: "stress"
+                }
+            },
+            normal: {
+                title: "Mood Kamu: NORMAL 😊",
+                description: "Kamu dalam mood santai dan butuh comfort yang familiar",
+                icon: "🤗",
+                product: {
+                    name: "Vanilla Bean",
+                    description: "Vanilla bean asli + karamel homemade + biskuit marie. Rasa comfort yang bikin nostalgic!",
+                    image: "🟤",
+                    class: "normal"
+                }
+            },
+            happy: {
+                title: "Mood Kamu: HAPPY 😄",
+                description: "Kamu lagi happy dan butuh sesuatu yang fresh dan uplifting",
+                icon: "✨",
+                product: {
+                    name: "Citrus Mint",
+                    description: "Jeruk nipis zest + mint segar + orange extract. Bikin mood makin cerah dan refreshing!",
+                    image: "🟢",
+                    class: "happy"
+                }
+            },
+            energy: {
+                title: "Mood Kamu: NEED ENERGY ⚡",
+                description: "Kamu butuh boost energy dan semangat untuk aktivitas",
+                icon: "💪",
+                product: {
+                    name: "Mocha Ginseng",
+                    description: "Espresso shot + dark chocolate + ginseng extract. Energy boost yang enak dan sehat!",
+                    image: "⚫",
+                    class: "energy"
+                }
+            }
+        };
+
+        function startQuiz() {
+            document.getElementById('intro').style.display = 'none';
+            document.getElementById('quiz').classList.add('active');
+            updateProgress();
+        }
+
+        function selectOption(option) {
+            // Remove previous selection
+            const options = option.parentNode.children;
+            for (let opt of options) {
+                opt.classList.remove('selected');
+            }
+            
+            // Add selection to clicked option
+            option.classList.add('selected');
+            
+            // Store answer
+            const question = option.closest('.question').dataset.question;
+            answers[question] = option.dataset.value;
+            
+            // Show next button
+            document.getElementById('nextBtn').style.display = 'inline-block';
+        }
+
+        function nextQuestion() {
+            if (!answers[currentQuestion]) return;
+            
+            if (currentQuestion < totalQuestions) {
+                // Hide current question
+                document.querySelector(`[data-question="${currentQuestion}"]`).classList.remove('active');
+                
+                // Show next question
+                currentQuestion++;
+                document.querySelector(`[data-question="${currentQuestion}"]`).classList.add('active');
+                
+                // Update navigation
+                document.getElementById('prevBtn').style.display = 'inline-block';
+                document.getElementById('nextBtn').style.display = answers[currentQuestion] ? 'inline-block' : 'none';
+                
+                if (currentQuestion === totalQuestions) {
+                    document.getElementById('nextBtn').innerHTML = 'Lihat Hasil <i class="fas fa-arrow-right"></i>';
+                }
+                
+                updateProgress();
+            } else {
+                showResult();
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestion > 1) {
+                // Hide current question
+                document.querySelector(`[data-question="${currentQuestion}"]`).classList.remove('active');
+                
+                // Show previous question
+                currentQuestion--;
+                document.querySelector(`[data-question="${currentQuestion}"]`).classList.add('active');
+                
+                // Update navigation
+                document.getElementById('prevBtn').style.display = currentQuestion > 1 ? 'inline-block' : 'none';
+                document.getElementById('nextBtn').style.display = 'inline-block';
+                document.getElementById('nextBtn').innerHTML = currentQuestion < totalQuestions ? 'Selanjutnya <i class="fas fa-arrow-right"></i>' : 'Lihat Hasil <i class="fas fa-arrow-right"></i>';
+                
+                updateProgress();
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion - 1) / totalQuestions) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function calculateMood() {
+            const moodCounts = { stress: 0, normal: 0, happy: 0, energy: 0 };
+            
+            for (let answer in answers) {
+                moodCounts[answers[answer]]++;
+            }
+            
+            // Find mood with highest count
+            let dominantMood = 'normal';
+            let maxCount = 0;
+            
+            for (let mood in moodCounts) {
+                if (moodCounts[mood] > maxCount) {
+                    maxCount = moodCounts[mood];
+                    dominantMood = mood;
+                }
+            }
+            
+            return dominantMood;
+        }
+
+        function showResult() {
+            const mood = calculateMood();
+            const data = moodData[mood];
+            
+            document.getElementById('quiz').classList.remove('active');
+            document.getElementById('result').classList.add('active');
+            
+            // Fill result data
+            document.getElementById('moodIcon').textContent = data.icon;
+            document.getElementById('moodTitle').textContent = data.title;
+            document.getElementById('moodDescription').textContent = data.description;
+            
+            document.getElementById('productImage').textContent = data.product.image;
+            document.getElementById('productImage').className = `product-image ${data.product.class}`;
+            document.getElementById('productName').textContent = data.product.name;
+            document.getElementById('productDescription').textContent = data.product.description;
+        }
+
+        function shareResult() {
+            const mood = calculateMood();
+            const data = moodData[mood];
+            const text = `Aku baru coba Mood Check di MoodScoop! ${data.title} dan rekomendasi es krimnya ${data.product.name}. Keren banget! 🍦🧠 #MoodScoopMoment`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'MoodScoop - Mood Check Result',
+                    text: text,
+                    url: window.location.href
+                });
+            } else {
+                // Fallback to copy to clipboard
+                navigator.clipboard.writeText(text + ' ' + window.location.href).then(() => {
+                    alert('Hasil berhasil dicopy! Paste di social media kamu ya!');
+                });
+            }
+        }
+
+        function restartQuiz() {
+            currentQuestion = 1;
+            answers = {};
+            
+            // Reset all questions
+            document.querySelectorAll('.question').forEach(q => q.classList.remove('active'));
+            document.querySelector('[data-question="1"]').classList.add('active');
+            
+            // Reset all selections
+            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            
+            // Reset navigation
+            document.getElementById('prevBtn').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('nextBtn').innerHTML = 'Selanjutnya <i class="fas fa-arrow-right"></i>';
+            
+            // Show quiz, hide result
+            document.getElementById('result').classList.remove('active');
+            document.getElementById('quiz').classList.add('active');
+            
+            updateProgress();
+        }
+
+        // Add some interactive effects
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add hover effects to options
+            document.querySelectorAll('.option').forEach(option => {
+                option.addEventListener('mouseenter', function() {
+                    if (!this.classList.contains('selected')) {
+                        this.style.transform = 'translateY(-3px)';
+                    }
+                });
+                
+                option.addEventListener('mouseleave', function() {
+                    if (!this.classList.contains('selected')) {
+                        this.style.transform = 'translateY(0)';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
